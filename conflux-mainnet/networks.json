@@ -1,0 +1,12 @@
+{
+  "conflux": {
+    "TokenSaleFactory": {
+      "address": "0x8bc7BA2e98c660819f74eD4B4759689BBC6cB041",
+      "startBlock": 116527625
+    },
+    "UsdtLiquidityPool": {
+      "address": "0x8fcf9c586d45ce7fcf6d714cb8b6b21a13111e0b",
+      "startBlock": 116527610
+    }
+  }
+}

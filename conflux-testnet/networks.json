@@ -1,0 +1,12 @@
+{
+  "conflux-testnet": {
+    "TokenSaleFactory": {
+      "address": "0xb8540a7d74Cc4912443e8c4B2064B640FC763c4f",
+      "startBlock": 205409670
+    },
+    "UsdtLiquidityPool": {
+      "address": "0xa0897a616ded6a5135d2ae0507bd66ea0af1fec3",
+      "startBlock": 205099119
+    }
+  }
+}

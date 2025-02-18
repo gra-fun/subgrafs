@@ -1,0 +1,267 @@
+type TokenSale @entity {
+  id: ID!                                   # Уникальный идентификатор токенсейла (адрес токена)
+  name: String!                             # Название токена
+  symbol: String!                           # Символ токена
+  metadata: String!                         # Метаданные токенсейла (дополнительная информация)
+  url: String!                              # URL, связанный с токенсейлом
+  referralLink: Bytes                       # Адрес реферальной ссылки (может быть null)
+  withDao: Boolean!                         # Флаг, указывающий, связан ли токенсейл с DAO
+  daoAddress: Bytes                         # Адрес ДАО (может быть null)
+  finishingTime: BigInt!                    # Время завершения токенсейла (Unix timestamp)
+  maxWalletAmount: BigInt!                  # Максимально допустимый баланс токенов на кошельке одного покупателя
+  creator: Bytes!                           # Адрес создателя токенсейла
+  createdAt: BigInt!                        # Время создания токенсейла (Unix timestamp)
+  creationTxHash: Bytes!                    # Хэш транзакции создания токенсейла
+  isFinished: Boolean!                      # Флаг, указывающий, завершен ли токенсейл
+  vTokenBalance: BigInt!                    # Текущий виртуальный баланс токенов в токенсейле
+  vBNBBalance: BigInt!                      # Текущий виртуальный баланс BNB  в токенсейле
+  tokenBalance: BigInt!                     # Текущий реальный баланс токенов в токенсейле
+  BNBBalance: BigInt!                       # Текущий реальный баланс BNB  в токенсейле
+  daoBalance: BigInt!                       # количество токенов собраных с комисий на дао
+  totalTokensSold: BigInt!                  # Общее количество проданных токенов
+  totalBnbVolume: BigInt!                   # Общий объем торгов в BNB
+  totalTokenVolume: BigInt!                 # Общий объем торгов в токенах
+  last24HourBnbVolume: BigInt!              # объем торгов в BNB за 24 часа
+  last24HourUSDVolume: BigInt!              # объем торгов в USD за 24 часа
+  last24HourTokenVolume: BigInt!            # объем торгов в токенах за 24 часа
+  price24hChange: BigDecimal!               # Процентное изменение цены за последние 24 часа
+  SoldPercentage: BigDecimal!               # Процент токенов, проданных в токенсейле от 80% tokenBalance
+  lastHourSoldPercentage: BigDecimal!       # Процент токенов, проданных за последний час
+  lastHourUpdateTimestamp: BigInt!          # Время последнего обновления часового процента
+  swapsCount: BigInt!                       # общее количество торговых операций
+  providedTokenLiquidity: BigInt!           # Предоставленная ликвидность в токенах
+  providedBNBLiquidity: BigInt!             # Предоставленная ликвидность в BNB
+  lastPrice: BigInt!                        # Полследняя финальная цена в BNB
+  bnbMarketCap: BigInt!                     # Стоимость тоталсаплая 1000 000 000 в BNB
+  liquidityMigrationTimestamp: BigInt       # Время когда была залита ликвидность на панкейк
+  pancakeSwapPool: PancakeSwapPool @derivedFrom(field: "tokenSale")          # пул панкейк свопа
+  swaps: [Swap!]! @derivedFrom(field: "tokenSale")                   # Список свопов, связанных с этим токенсейлом
+  candlesticks: [Candlestick!]! @derivedFrom(field: "tokenSale")     # Список свечей для этого токенсейла
+  userTokenSales: [UserTokenSale!]! @derivedFrom(field: "tokenSale") # Список пользовательских записей для этого токенсейла
+}
+
+type PancakeSwapPool @entity {
+  id: ID!
+  tokenSale: TokenSale!
+  token0: Bytes!
+  token1: Bytes!
+  fee: Int!
+  sqrtPriceX96: BigInt!
+  liquidity: BigInt!
+  tick: BigInt!
+  observationIndex: BigInt!
+  volumeToken0: BigInt!
+  volumeToken1: BigInt!
+  volumeUSD: BigDecimal!
+  feesUSD: BigDecimal!
+  txCount: BigInt!
+  createdAtTimestamp: BigInt!
+  createdAtBlockNumber: BigInt!
+  reserve0: BigInt!
+  reserve1: BigInt!
+}
+
+type DailyStatistics @entity {
+  id: ID! # Будет использоваться timestamp начала дня
+  date: String!
+  cumulativeFeesBNB: BigInt!
+  cumulativeFeesUSD: BigInt!
+  cumulativeRevenueBNB: BigInt!
+  cumulativeRevenueUSD: BigInt!
+  cumulativeUniqueHolders: BigInt!
+  cumulativeUniqueActiveUsers: BigInt!
+  cumulativeTokenSalesCreated: BigInt!
+  cumulativeTradingVolumeBNB: BigInt!
+  cumulativeTradingVolumeUSD: BigInt!
+}
+
+type BNBPrice @entity {
+  id: ID!                                   # Уникальный идентификатор свопа
+  bnbPrice: BigInt!                         # Цена BNB в USD с прайс фида свопе
+}
+
+
+type Swap @entity {
+  id: ID!                                   # Уникальный идентификатор свопа
+  tokenSale: TokenSale!                     # Связь с токенсейлом
+  user: User!                               # Пользователь, совершивший своп
+  referrer: Referrer                        # Реферер (если есть)
+  isBuy: Boolean!                           # Флаг, указывающий, является ли это покупкой (true) или продажей (false)
+  bnbAmount: BigInt!                        # Количество BNB в свопе
+  bnbPrice: BigInt!                         # Цена BNB в USD с прайс фида свопе
+  usdAmount: BigInt!                        # Количество USD в свопе
+  tokenAmount: BigInt!                      # Количество токенов в свопе
+  bnbFee: BigInt!                           # Комиссия в BNB
+  daoFee: BigInt!                           # Комиссия для DAO (если применимо)
+  referrerCommission: BigInt!               # Комиссия реферера
+  timestamp: BigInt!                        # Время совершения свопа (Unix timestamp)
+  transactionHash: Bytes!                   # Хэш транзакции свопа
+  source: String!                           # "gra.fun" или "pancake"
+}
+
+type User @entity {
+  id: ID!                                                       # Уникальный идентификатор пользователя (адрес)
+  swaps: [Swap!]! @derivedFrom(field: "user")                   # Список свопов пользователя
+  userTokenSales: [UserTokenSale!]! @derivedFrom(field: "user") # Список записей пользователя по токенсейлам
+  referrer: Referrer                                            # Реферал
+  createdTokenSalesCount: BigInt!                               # Количество созданых токенсейлов
+  totalTradesCount: BigInt!                                     # Количество трейдов
+  totalBuyVolumeBNB: BigInt!                                    # На сколько сумарно BNB купил токенов
+  totalSellVolumeBNB: BigInt!                                   # На сколько сумарно BNB продал токенов
+  totalVolumeBNB: BigInt!                                       # Общий обьем BNB
+  totalVolumeUSD: BigInt!                                       # Общий обьем USD
+  totalTokenSaleTradesCount: BigInt!                            # Количество трейдов в токенсейле
+  totalTokenSaleBuyVolumeBNB: BigInt!                           # На сколько сумарно BNB купил токенов в токенсейле
+  totalTokenSaleSellVolumeBNB: BigInt!                          # На сколько сумарно BNB продал токенов в токенсейле
+  totalTokenSaleVolumeBNB: BigInt!                              # Общий обьем BNB в токенсейле
+  totalTokenSaleVolumeUSD: BigInt!                              # Общий обьем USD в токенсейле
+  totalProxyDEXTradesCount: BigInt!                             # Количество трейдов через ProxyDEX
+  totalProxyDEXBuyVolumeBNB: BigInt!                            # На сколько сумарно BNB купил токенов через ProxyDEX
+  totalProxyDEXSaleSellVolumeBNB: BigInt!                       # На сколько сумарно BNB продал токенов через ProxyDEX
+  totalProxyDEXSaleVolumeBNB: BigInt!                           # Общий обьем BNB через ProxyDEX
+  totalProxyDEXSaleVolumeUSD: BigInt!                           # Общий обьем USD через ProxyDEX
+  totalReferrerCommissionBNB: BigInt!                           # Общее количество комисии которую получил реферал в BNB
+  active: Boolean!                                              # Активный или холдер
+}
+
+type Referrer @entity {
+  id: ID!                                                   # Уникальный идентификатор реферера (адрес)
+  swaps: [Swap!]! @derivedFrom(field: "referrer")           # Список свопов, где этот адрес был реферером
+  totalCommission: BigInt!                                  # Общая сумма комиссий, полученных реферером
+  activeReferrals: [User!]! @derivedFrom(field: "referrer") # Список активных рефералов
+  totalActiveReferrals: BigInt!                             # Количество активных рефералов
+}
+
+type Candlestick @entity {
+  id: ID!                                   # Уникальный идентификатор свечи
+  tokenSale: TokenSale!                     # Связь с токенсейлом
+  interval: String!                         # Интервал свечи (например, "1h", "1d")
+  timestamp: BigInt!                        # Время начала свечи (Unix timestamp)
+  open: BigDecimal!                         # Цена открытия
+  high: BigDecimal!                         # Наивысшая цена за период
+  low: BigDecimal!                          # Наинизшая цена за период
+  close: BigDecimal!                        # Цена закрытия
+  bnbVolume: BigInt!                    # Объем торгов за период BNB
+  usdVolume: BigInt!                    # Объем торгов за период USD
+  tokensBought: BigInt!                     # Количество токенов, купленных за период свечи
+  tokensSold: BigInt!                       # Количество токенов, проданных за период свечи
+  bnbBuyVolume: BigInt!                     # Объем покупок в BNB за период свечи
+  bnbSellVolume: BigInt!                    # Объем продаж в BNB за период свечи
+  usdBuyVolume: BigInt!                     # Объем покупок в USD за период свечи
+  usdSellVolume: BigInt!                    # Объем продаж в USD за период свечи
+}
+
+type UserTokenSale @entity {
+  id: ID!                                   # Уникальный идентификатор записи пользователя по токенсейлу
+  user: User!                               # Связь с пользователем
+  tokenSale: TokenSale!                     # Связь с токенсейлом
+  tokensBought: BigInt!                     # Общее количество купленных токенов пользователем в этом токенсейле
+  tokensSold: BigInt!                       # Общее количество проданных токенов пользователем в этом токенсейле
+  currentBalance: BigInt!                   # Текущий баланс пользователя в этом токенсейле
+}
+
+# FOR DEBUG Raw events
+
+type RawEvent @entity {
+  id: ID! # Будет использоваться хеш транзакции
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  tokenSaleCreatedEvents: [RawTokenSaleCreatedEvent!] @derivedFrom(field: "rawEvent")
+  tokenSaleConfigEvents: [RawTokenSaleConfigEvent!] @derivedFrom(field: "rawEvent")
+  tokenSaleFinishedEvents: [RawTokenSaleFinishedEvent!] @derivedFrom(field: "rawEvent")
+  swapEvents: [RawSwapEvent!] @derivedFrom(field: "rawEvent")
+  syncEvents: [RawSyncEvent!] @derivedFrom(field: "rawEvent")
+  redeemEvents: [RawRedeemEvent!] @derivedFrom(field: "rawEvent")
+}
+
+type RawTokenSaleCreatedEvent @entity {
+  id: ID!
+  rawEvent: RawEvent!
+  logIndex: BigInt!
+  token: Bytes!
+  name: String!
+  symbol: String!
+  metadata: String!
+  url: String!
+  referralLink: Bytes
+}
+
+type RawTokenSaleConfigEvent @entity {
+  id: ID!
+  rawEvent: RawEvent!
+  logIndex: BigInt!
+  token: Bytes!
+  withDao: Boolean!
+  finishingTime: BigInt!
+  maxWalletAmount: BigInt!
+  vTokenBalance: BigInt!
+  vBNBBalance: BigInt!
+}
+
+type RawTokenSaleFinishedEvent @entity {
+  id: ID!
+  rawEvent: RawEvent!
+  logIndex: BigInt!
+  token: Bytes!
+  dao: Bytes!
+  tokenReserve: BigInt!
+  bnbReserve: BigInt!
+  sentToDao: BigInt!
+}
+
+type RawSwapEvent @entity {
+  id: ID!
+  rawEvent: RawEvent!
+  logIndex: BigInt!
+  user: Bytes!
+  referrer: Bytes!
+  token: Bytes!
+  isBuy: Boolean!
+  bnbAmount: BigInt!
+  tokenAmount: BigInt!
+  bnbFee: BigInt!
+  daoFee: BigInt!
+}
+
+type RawSyncEvent @entity {
+  id: ID!
+  rawEvent: RawEvent!
+  logIndex: BigInt!
+  token: Bytes!
+  startPrice: BigInt!
+  endPrice: BigInt!
+  bnbAmount: BigInt!
+  tokenAmount: BigInt!
+  bnbReserve: BigInt!
+  tokenReserve: BigInt!
+}
+
+type RawRedeemEvent @entity {
+  id: ID!
+  rawEvent: RawEvent!
+  logIndex: BigInt!
+  token: Bytes!
+  tokenAmount: BigInt!
+  wethAmount: BigInt!
+}
+
+type RawPancakeSwapEvent @entity {
+  id: ID!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  tokenSale: TokenSale!
+  sender: Bytes!
+  recipient: Bytes!
+  amount0: BigInt!
+  amount1: BigInt!
+  sqrtPriceX96: BigInt!
+  liquidity: BigInt!
+  tick: BigInt!
+}
+
+type MainAssetPrice @entity {
+  id: ID!
+  timestamp: BigInt!
+  price: BigInt!
+}

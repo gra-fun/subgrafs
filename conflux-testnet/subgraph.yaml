@@ -1,0 +1,116 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: TokenSaleFactory
+    network: conflux-testnet
+    source:
+      address: "0xb8540a7d74Cc4912443e8c4B2064B640FC763c4f"
+      abi: TokenSaleFactory
+      startBlock: 205409670
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - TokenSale
+        - Swap
+        - User
+        - Referrer
+        - Candlestick
+        - UserTokenSale
+        - RawEvent
+        - RawTokenSaleCreatedEvent
+        - RawTokenSaleConfigEvent
+        - RawTokenSaleFinishedEvent
+        - RawSwapEvent
+        - RawSyncEvent
+        - RawRedeemEvent
+      abis:
+        - name: TokenSaleFactory
+          file: ./abis/TokenSaleFactory.json
+      eventHandlers:
+        - event: TokenSaleCreated(address,string,string,string,string,address)
+          handler: handleTokenSaleCreated
+        - event: TokenSaleConfig(address,bool,uint256,uint256,uint256,uint256)
+          handler: handleTokenSaleConfig
+        - event: TokenSaleFinished(address,address,uint256,uint256,uint256)
+          handler: handleTokenSaleFinished
+        - event: Swap(indexed address,indexed address,indexed
+            address,bool,uint256,uint256,uint256,uint256)
+          handler: handleSwap
+        - event: Sync(address,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleSync
+        - event: Redeem(address,uint256,uint256)
+          handler: handleRedeem
+      file: ./src/mapping.ts
+  - kind: ethereum
+    name: UsdtLiquidityPool
+    network: conflux-testnet
+    source:
+      address: "0xa0897a616ded6a5135d2ae0507bd66ea0af1fec3"
+      abi: UniswapV2Pair
+      startBlock: 205099119
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - MainAssetPrice
+      abis:
+        - name: PancakeV3Pool
+          file: ./abis/PancakeV3Pool.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+      eventHandlers:
+        - event: Sync(uint112,uint112)
+          handler: handleMainAssetPriceSync
+      file: ./src/mapping.ts
+templates:
+  - name: ERC20
+    kind: ethereum/contract
+    network: conflux-testnet
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      entities:
+        - TokenBalance
+        - User
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+  - name: PancakePool
+    kind: ethereum/contract
+    network: conflux-testnet
+    source:
+      abi: UniswapV2Pair
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      entities:
+        - TokenSale
+        - Swap
+        - User
+        - Candlestick
+        - Referrer
+        - UserTokenSale
+      abis:
+        - name: PancakeV3Pool
+          file: ./abis/PancakeV3Pool.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+      eventHandlers:
+        - event: Sync(uint112,uint112)
+          handler: handleUniswapV2PairSync
+        - event: Swap(indexed address,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleUniswapV2PairSwap
