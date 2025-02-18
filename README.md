@@ -17,11 +17,11 @@ The separation into different folders is necessary because:
 
 ### Environment Setup
 Install required global packages:
-# Install Yarn globally
+#### Install Yarn globally
 ```bash
 npm i -g yarn
 ```
-# Install Graph CLI globally
+#### Install Graph CLI globally
 ```bash
 yarn add -G @graphprotocol/graph-cli
 ```
@@ -29,7 +29,7 @@ yarn add -G @graphprotocol/graph-cli
 ### Project Setup and Deployment
 
 1. Navigate to the desired network directory:
-# For conflux-mainnet
+#### For conflux-mainnet
 ```bash
 cd conflux-mainnet
 ```
